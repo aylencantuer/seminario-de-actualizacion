@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="estetica.css">
+
+    <title>Agenda de Contactos</title>
+    
+</head>
+<body>
+
+    <form id="contact-form" onsubmit="return validarFormulario()">
+        <label for="id">ID:</label>
+        <input type="text" id="id" name="id" required>
+    
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required>
+    
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido" name="apellido" required>
+    
+        <label for="email">Correo electrónico:</label>
+        <input type="email" id="email" name="email" required>
+    
+        <label for="direccion">Dirección:</label>
+        <input type="text" id="direccion" name="direccion" required>
+    
+        <!-- Campos para números de teléfono -->
+        <div id="phone-fields">
+            <label for="telefono1">Teléfono:</label>
+            <input type="text" class="telefono" name="telefono">
+            <!-- Aquí puedes agregar más campos de entrada para más números de teléfono -->
+        </div>
+        <button type="button" id="add-phone">Agregar teléfono</button>
+    
+        <button type="submit">Agregar contacto</button>
+    </form>
+    
+    <table id="contact-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Correo electrónico</th>
+                <th>Dirección</th>
+                <th>Teléfonos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>0001</td>
+                <td>Aylen</td>
+                <td>Cantuer</td>
+                <td>aylen@example.com</td>
+                <td>Colombia 2345</td>
+                <td>
+                    <ul>
+                        <li>22345766896</li>
+                        <!-- Puedes agregar más números de teléfono aquí -->
+                    </ul>
+                </td>
+                <td>
+                    <button class="editar">Editar</button>
+                    <button onclick="borrarContacto(this)">Borrar</button>
+                </td>
+            </tr>
+            <!-- Puedes agregar más filas para más contactos -->
+        </tbody>
+    </table>
+
+<script src="./script.js"></script>
+
+<script>
+    // Función para validar el formulario
+    function validarFormulario() {
+        // Obtener los valores de los campos
+        var id = document.getElementById("id").value;
+        var nombre = document.getElementById("nombre").value;
+        var apellido = document.getElementById("apellido").value;
+        var email = document.getElementById("email").value;
+        var direccion = document.getElementById("direccion").value;
+        var telefonos = document.querySelectorAll(".telefono");
+
+        // Validar que ningún campo esté vacío
+        if (id === "" || nombre === "" || apellido === "" || email === "" || direccion === "") {
+            alert("Por favor, completa todos los campos.");
+            return false; // Detener el envío del formulario si hay campos vacíos
+        }
+
+        // Validar al menos un número de teléfono
+        var telefonoValido = false;
+        for (var i = 0; i < telefonos.length; i++) {
+            if (telefonos[i].value.trim() !== "") {
+                telefonoValido = true;
+                break;
+            }
+        }
+        if (!telefonoValido) {
+            alert("Por favor, agrega al menos un número de teléfono.");
+            return false; // Detener el envío del formulario si no hay al menos un número de teléfono
+        }
+
+        return true; // Permitir el envío del formulario si todos los campos están completos
+    }
+
+    // Agregar evento al botón "Agregar teléfono"
+    document.getElementById("add-phone").addEventListener("click", function() {
+        var phoneFields = document.getElementById("phone-fields");
+        var newPhoneField = document.createElement("div");
+        newPhoneField.innerHTML = '<label for="telefono">Teléfono:</label> <input type="text" class="telefono" name="telefono">';
+        phoneFields.appendChild(newPhoneField);
+    });
+
+    // Agregar eventos de validación para otros campos del formulario
+    document.getElementById("id").addEventListener("blur", validarCampo);
+    document.getElementById("nombre").addEventListener("blur", validarCampo);
+    document.getElementById("apellido").addEventListener("blur", validarCampo);
+    document.getElementById("email").addEventListener("blur", validarCampo);
+    document.getElementById("direccion").addEventListener("blur", validarCampo);
+
+    // Función para validar un campo individual
+    function validarCampo(event) {
+        var campo = event.target;
+        if (campo.value.trim() === "") {
+            alert("Por favor, completa el campo " + campo.name + ".");
+            campo.focus();
+        }
+    }
+</script>
+
+
+</body>
+</html>
