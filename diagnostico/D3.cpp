@@ -46,9 +46,9 @@ bool validarPassword(const string& password) {
 int main() {
 
     Client clients[] = {
-        Client("Aylen", "1234"),
-        Client("Gabi", "0456"),
-        Client("Silvi", "0440"),
+        Client("Aylen", "Aylen@1234"),
+        Client("Gabi", "Gabi#0456"),
+        Client("Silvi", "Silvi$0440"),
     };
 
     string username, password;
