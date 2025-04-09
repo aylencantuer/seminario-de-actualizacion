@@ -82,8 +82,9 @@ int main() {
              << "2. Nuevo Articulo\n"
              << "3. Editar Articulo\n"
              << "4. Eliminar Articulo\n"
-             << "5. Iniciar sesion\n"
-             << "6. Crear cuenta de usuario\n"
+             << "5. Comprar Articulo\n"             
+             << "6. Iniciar sesion\n"
+             << "7. Crear cuenta de usuario\n"
              << "Ingrese el numero de la opcion deseada (1-6): ";
         cin >> opcionMenu;
 
@@ -179,7 +180,58 @@ int main() {
             }
         }
 
-        else if (opcionMenu == 5) {         // Iniciar sesión
+        else if (opcionMenu == 5) { // Comprar artículo
+            int idCompra, cantidadCompra;
+            bool encontrado = false;
+        
+            cout << "\n--- Comprar Artículo ---\n";
+            cout << "Listado de artículos disponibles:\n";
+            for (auto& articulo : articles) {
+                cout << "ID: " << articulo.getid()
+                     << " | Nombre: " << articulo.getNombre()
+                     << " | Precio: $" << articulo.getPrecio()
+                     << " | Stock: " << articulo.getStock() << endl;
+            }
+        
+            cout << "\nIngrese el ID del artículo que desea comprar: ";
+            cin >> idCompra;
+        
+            for (auto& articulo : articles) {
+                if (articulo.getid() == idCompra) {
+                    encontrado = true;
+        
+                    if (articulo.getStock() <= 0) {
+                        cout << "Lo sentimos, el artículo no tiene stock disponible.\n";
+                        break;
+                    }
+        
+                    cout << "Ingrese la cantidad que desea comprar: ";
+                    cin >> cantidadCompra;
+        
+                    if (cantidadCompra <= 0) {
+                        cout << "Cantidad inválida. Operación cancelada.\n";
+                        break;
+                    }
+        
+                    if (cantidadCompra > articulo.getStock()) {
+                        cout << "No hay suficiente stock. Stock disponible: "
+                             << articulo.getStock() << "\n";
+                        break;
+                    }
+        
+                    articulo.setStock(articulo.getStock() - cantidadCompra);
+                    cout << "Compra realizada con éxito. ¡Gracias por su compra!\n";
+                    break;
+                }
+            }
+        
+            if (!encontrado) {
+                cout << "No se encontró ningún artículo con ese ID.\n";
+            }
+        }
+        
+
+        else if (opcionMenu == 6) {         // Iniciar sesión
             cout << "Ingrese su nombre de usuario: ";
             cin >> username;
             cout << "Ingrese su password: ";
