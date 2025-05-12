@@ -1,0 +1,327 @@
+<script type="text/javascript">
+
+let authData = new Map();
+const maxLoginFailedAttempts = 3;
+
+let articles = [
+  { id: 1, name: "Lavandina x 1L", price: 875.25, stock: 3000 },
+  { id: 4, name: "Detergente x 500mL", price: 1102.45, stock: 2010 },
+  { id: 22, name: "Jabón en polvo x 250g", price: 650.22, stock: 407 }
+];
+
+let userData = [
+  {
+    password: '1234SCO!!.',
+    failedLoginCounter: 0,
+    isLocked: false
+  },
+  {
+    password: '1234AYL!!.',
+    failedLoginCounter: 0,
+    isLocked: false
+  }
+];
+
+authData.set('scorpion', userData[0]);
+authData.set('aylen', userData[1]);
+
+function isValidUserGetData(username) {
+  return authData.get(username);
+}
+
+function authenticateUser(username, password) {
+  let api_return = {
+    status: false,
+    result: null
+  };
+
+  if (username && password) {
+    let userdata = isValidUserGetData(username);
+
+    if (userdata) {
+      if (!userdata.isLocked) {
+        if (userdata.password === password) {
+          api_return.status = true;
+        } else {
+          userdata.failedLoginCounter++;
+
+          if (userdata.failedLoginCounter >= maxLoginFailedAttempts) {
+            userdata.isLocked = true;
+            api_return.result = 'BLOCKED_USER';
+          } else {
+            api_return.result = 'USER_PASSWORD_FAILED';
+          }
+        }
+      } else {
+        api_return.result = 'BLOCKED_USER';
+      }
+    } else {
+      api_return.result = 'USER_PASSWORD_FAILED';
+    }
+  }
+
+  return api_return;
+}
+
+function isValidPassword(password) {
+  const lengthOk = password.length >= 8 && password.length <= 16;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasAlphanumeric = /[A-Za-z0-9]/.test(password);
+  const specialChars = password.replace(/[A-Za-z0-9]/g, '');
+  const hasTwoSpecials = specialChars.length >= 2;
+
+  return lengthOk && hasUppercase && hasAlphanumeric && hasTwoSpecials;
+}
+
+function showUserMenu(username) {
+  let userdata = isValidUserGetData(username);
+  let option;
+
+  do {
+    option = window.prompt("Menú de acciones:\n1. Cambiar contraseña\n2. Gestión de artículos\nX. Salir").toUpperCase();
+
+    switch (option) {
+      case "1":
+        let newPassword = window.prompt("Ingrese nueva contraseña:");
+
+        if (!newPassword) {
+          alert("La contraseña no puede estar vacía.");
+        } else if (!isValidPassword(newPassword)) {
+          alert("La contraseña debe tener entre 8 y 16 caracteres alfanuméricos, al menos una mayúscula y al menos 2 símbolos especiales.");
+        } else {
+          userdata.password = newPassword;
+          alert("Contraseña cambiada exitosamente.");
+        }
+        break;
+
+      case "2":
+        manageArticles();
+        break;
+    }
+
+  } while (option !== "X");
+}
+
+function manageArticles() {
+  let option;
+
+  do {
+        option = window.prompt(
+        "Gestión de artículos:\n" +
+        "1. Listar artículos\n" +
+        "2. Nuevo artículo\n" +
+        "3. Editar artículo\n" +
+        "4. Eliminar artículo\n" +
+        "5. Comprar artículo\n" +  
+        "X. Volver"
+        ).toUpperCase();
+
+    switch (option) {
+      case "1":
+        listArticles();
+        break;
+      case "2":
+        createArticle();
+        break;
+      case "3":
+        editArticle();
+        break;
+      case "4":
+        deleteArticle();
+        break;
+    case "5":
+        purchaseArticle();
+        break;
+    }
+  } while (option !== "X");
+}
+
+function listArticles() {
+  if (articles.length === 0) {
+    alert("No hay artículos registrados.");
+    return;
+  }
+
+  let output = "Listado de artículos:\n";
+  // Función lambda (función anónima de flecha) para recorrer cada artículo
+  articles.forEach(article => {
+    output += `ID: ${article.id} | Nombre: ${article.name} | Precio: $${article.price.toFixed(2)} | Stock: ${article.stock}\n`;
+  });
+
+  alert(output);
+}
+
+function createArticle() {
+  // Se hace parseo explícito de string a entero
+  let id = parseInt(prompt("Ingrese ID del nuevo artículo:"));
+  if (isNaN(id) || articles.find(a => a.id === id)) {
+    alert("ID inválido o ya existente.");
+    return;
+  }
+
+  let name = prompt("Ingrese nombre del artículo:");
+  let price = parseFloat(prompt("Ingrese precio:")); 
+  let stock = parseInt(prompt("Ingrese stock:")); 
+
+  if (!name || isNaN(price) || isNaN(stock)) {
+    alert("Datos inválidos.");
+    return;
+  }
+
+  articles.push({ id, name, price, stock });
+  alert("Artículo creado correctamente.");
+}
+
+function editArticle() {
+  let id = parseInt(prompt("Ingrese ID del artículo a editar:"));
+  let article = articles.find(a => a.id === id); 
+
+  if (!article) {
+    alert("Artículo no encontrado.");
+    return;
+  }
+
+  let name = prompt(`Nombre actual: ${article.name}\nNuevo nombre (dejar vacío para mantener):`);
+  let price = prompt(`Precio actual: $${article.price}\nNuevo precio (dejar vacío para mantener):`);
+  let stock = prompt(`Stock actual: ${article.stock}\nNuevo stock (dejar vacío para mantener):`);
+
+  if (name) article.name = name;
+  if (price) {
+    let parsed = parseFloat(price);
+    if (!isNaN(parsed)) article.price = parsed;
+  }
+  if (stock) {
+    let parsed = parseInt(stock);
+    if (!isNaN(parsed)) article.stock = parsed;
+  }
+
+  alert("Artículo editado correctamente.");
+}
+
+function deleteArticle() {
+  let id = parseInt(prompt("Ingrese ID del artículo a eliminar:"));
+  // Se usa findIndex (también una función lambda) para ubicar la posición del artículo
+  let index = articles.findIndex(a => a.id === id);
+
+  if (index === -1) {
+    alert("Artículo no encontrado.");
+    return;
+  }
+
+  articles.splice(index, 1);
+  alert("Artículo eliminado correctamente.");
+}
+
+function purchaseArticle() {
+  let id = parseInt(prompt("Ingrese ID del artículo que desea comprar:"));
+  let article = articles.find(a => a.id === id);
+
+  if (!article) {
+    alert("Artículo no encontrado.");
+    return;
+  }
+
+  if (article.stock <= 0) {
+    alert("No hay stock disponible para este artículo.");
+    return;
+  }
+
+  let quantity = parseInt(prompt(`Ingrese cantidad a comprar (stock disponible: ${article.stock}):`));
+  
+  if (isNaN(quantity) || quantity <= 0) {
+    alert("Cantidad inválida.");
+    return;
+  }
+
+  if (quantity > article.stock) {
+    alert("No hay suficiente stock para esa cantidad.");
+    return;
+  }
+
+  let confirmPurchase = confirm(`Confirmar compra de ${quantity} unidad(es) de "${article.name}" por un total de $${(article.price * quantity).toFixed(2)}?`);
+  
+  if (confirmPurchase) {
+    article.stock -= quantity;
+    alert(`Compra realizada con éxito. Stock restante: ${article.stock}`);
+  } else {
+    alert("Compra cancelada.");
+  }
+}
+
+
+function GUI_login() {
+  let username = window.prompt("Ingrese su nombre de usuario:");
+  let password = window.prompt("Ingrese contraseña:");
+
+  let api_return = authenticateUser(username, password);
+
+  if (api_return.status) {
+    alert(`¡Bienvenido/a ${username}!`);
+    showUserMenu(username);
+  } else {
+    switch (api_return.result) {
+      case 'BLOCKED_USER':
+        alert('Usuario bloqueado. Contacte al administrador');
+        break;
+      case 'USER_PASSWORD_FAILED':
+        alert('Usuario y/o contraseña incorrecta');
+        break;
+      default:
+        alert('Error desconocido');
+    }
+  }
+}
+
+function GUI_register() {
+  let username = window.prompt("Ingrese nuevo nombre de usuario:");
+
+  if (!username || authData.has(username)) {
+    alert("Nombre de usuario inválido o ya existente.");
+    return;
+  }
+
+  let password = window.prompt("Ingrese contraseña:");
+
+  if (!isValidPassword(password)) {
+    alert("La contraseña debe tener entre 8 y 16 caracteres alfanuméricos, al menos una mayúscula y al menos 2 símbolos especiales.");
+    return;
+  }
+
+  authData.set(username, {
+    password: password,
+    failedLoginCounter: 0,
+    isLocked: false
+  });
+
+  alert("Cuenta creada exitosamente.");
+}
+
+function GUI_mainMenu() {
+  let option;
+
+  do {
+    option = window.prompt("Menú principal:\n1. Iniciar sesión\n2. Crear cuenta\nX. Salir").toUpperCase();
+
+    switch (option) {
+      case "1":
+        GUI_login();
+        break;
+      case "2":
+        GUI_register();
+        break;
+      case "X":
+        alert("Gracias por usar el sistema, adioooooos");
+        break;
+      default:
+        alert("Opción no válida.");
+    }
+  } while (option !== "X");
+}
+
+function main() {
+  GUI_mainMenu();
+}
+
+window.onload = main;
+
+</script>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Unidad 1</title>
+</head>
+
+<body>
+</body>
+
+<script type="text/javascript">
+
+let authData = new Map();
+const maxLoginFailedAttempts = 3;
+
+let userData = [
+  {
+    password: '987654',
+    failedLoginCounter: 0,
+    isLocked: false
+  },
+  {
+    password: '987654',
+    failedLoginCounter: 0,
+    isLocked: false
+  }
+];
+
+authData.set('scorpion', userData[0]);
+authData.set('aylen', userData[1]);
+
+function isValidUserGetData(username) {
+  return authData.get(username);
+}
+
+function authenticateUser(username, password) {
+  let api_return = {
+    status: false,
+    result: null
+  };
+
+  if (username && password) {
+    let userdata = isValidUserGetData(username);
+
+    if (userdata) {
+      if (!userdata.isLocked) {
+        if (userdata.password === password) {
+          api_return.status = true;
+        } else {
+          userdata.failedLoginCounter++;
+
+          if (userdata.failedLoginCounter >= maxLoginFailedAttempts) {
+            userdata.isLocked = true;
+            api_return.result = 'BLOCKED_USER';
+          } else {
+            api_return.result = 'USER_PASSWORD_FAILED';
+          }
+        }
+      } else {
+        api_return.result = 'BLOCKED_USER';
+      }
+    } else {
+      api_return.result = 'USER_PASSWORD_FAILED';
+    }
+  }
+
+  return api_return;
+}
+
+// NUEVA FUNCIONALIDAD: Menú luego del login
+
+function showUserMenu(username) {
+  let userdata = isValidUserGetData(username);
+  let option;
+
+  do {
+    option = window.prompt("Menú de acciones:\n1. Cambiar contraseña\nX. Salir").toUpperCase();
+
+    if (option === "1") {
+      let newPassword = window.prompt("Ingrese nueva contraseña:");
+      if (newPassword) {
+        userdata.password = newPassword;
+        alert("Contraseña cambiada exitosamente.");
+      } else {
+        alert("La contraseña no puede estar vacía.");
+      }
+    }
+
+  } while (option !== "X");
+}
+
+function GUI_login() {
+  let username = window.prompt("Ingrese su nombre de usuario:");
+  let password = window.prompt("Ingrese contraseña:");
+
+  let api_return = authenticateUser(username, password);
+
+  if (api_return.status) {
+    alert(`¡Bienvenido/a ${username}!`);
+    showUserMenu(username); // NUEVO: menú tras login exitoso
+    GUI_login(); // vuelve al login tras salir del menú
+  } else {
+    switch (api_return.result) {
+      case 'BLOCKED_USER':
+        alert('Usuario bloqueado. Contacte al administrador');
+        break;
+      case 'USER_PASSWORD_FAILED':
+        alert('Usuario y/o contraseña incorrecta');
+        GUI_login();
+        break;
+      default:
+        alert('Error desconocido');
+    }
+  }
+}
+
+function main() {
+  GUI_login();
+}
+
+window.onload = main;
+
+</script>
+
+</html>
