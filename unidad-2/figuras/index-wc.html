@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Prototipo de Aplicación de Figuras</title>
+<style>
+ body
+ {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+ }
+</style>
+</head>
+<body>
+  
+<script type="text/javascript">
+
+class ApplicationUI extends HTMLElement 
+{
+    constructor() 
+    {
+        super();
+        const shadow = this.attachShadow({ mode: 'closed' });
+
+        // ==== Styles ====
+        const style = document.createElement('style');
+        style.textContent = `
+          :host {
+            display: flex;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+          }
+
+          .sidebar {
+            width: 200px;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-right: 1px solid #ccc;
+          }
+
+          .sidebar button {
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+          }
+
+          .sidebar input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+          }
+
+          .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            border-right: 1px solid #ccc;
+          }
+
+          canvas {
+            border: 1px solid #000;
+            width: 600px;
+            height: 400px;
+            background-color: #eee;
+          }
+
+          .table-panel {
+            width: 300px;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          th, td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: left;
+          }
+
+          th {
+            background-color: #ddd;
+          }
+
+          td input[type="radio"] {
+            display: block;
+            margin: auto;
+          }
+        `;
+
+        // ==== Container ====
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flex = '1';
+
+        // ==== Sidebar ====
+        const sidebar = document.createElement('div');
+        sidebar.className = 'sidebar';
+
+        this.btnRect = document.createElement('button');
+        this.btnRect.textContent = 'Crear rectángulo';
+
+        this.btnCircle = document.createElement('button');
+        this.btnCircle.textContent = 'Crear círculo';
+
+        this.btnTriangle = document.createElement('button');
+        this.btnTriangle.textContent = 'Crear triángulo';
+
+        const colorLabel = document.createElement('label');
+        colorLabel.setAttribute('for', 'colorPicker');
+        colorLabel.textContent = 'Color:';
+
+        this.colorInput = document.createElement('input');
+        this.colorInput.type = 'color';
+        this.colorInput.id = 'colorPicker';
+        this.colorInput.name = 'colorPicker';
+
+        sidebar.appendChild(this.btnRect);
+        sidebar.appendChild(this.btnCircle);
+        sidebar.appendChild(this.btnTriangle);
+        sidebar.appendChild(colorLabel);
+        sidebar.appendChild(this.colorInput);
+
+        // ==== Canvas Container ====
+        const canvasContainer = document.createElement('div');
+        canvasContainer.className = 'canvas-container';
+
+        this.canvas = document.createElement('canvas');
+        canvasContainer.appendChild(this.canvas);
+
+        // ==== Table Panel ====
+        const tablePanel = document.createElement('div');
+        tablePanel.className = 'table-panel';
+
+        this.table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const trHead = document.createElement('tr');
+
+        const thId = document.createElement('th');
+        thId.textContent = 'ID';
+        const thName = document.createElement('th');
+        thName.textContent = 'Nombre';
+        const thSelect = document.createElement('th');
+        thSelect.textContent = 'Seleccionar';
+
+        trHead.appendChild(thId);
+        trHead.appendChild(thName);
+        trHead.appendChild(thSelect);
+        thead.appendChild(trHead);
+        this.table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        // Ejemplo de fila
+        const exampleRow = document.createElement('tr');
+        const tdId = document.createElement('td');
+        tdId.textContent = '1';
+
+        const tdName = document.createElement('td');
+        tdName.textContent = 'Rectángulo';
+
+        const tdRadio = document.createElement('td');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'figuraSeleccionada';
+        tdRadio.appendChild(radio);
+
+        exampleRow.appendChild(tdId);
+        exampleRow.appendChild(tdName);
+        exampleRow.appendChild(tdRadio);
+        tbody.appendChild(exampleRow);
+
+        this.table.appendChild(tbody);
+        tablePanel.appendChild(this.table);
+
+        // ==== Assemble ====
+        container.appendChild(sidebar);
+        container.appendChild(canvasContainer);
+        container.appendChild(tablePanel);
+
+        shadow.appendChild(style);
+        shadow.appendChild(container);
+
+        //-------------------------------Event management-------
+        this.btnRect.onclick = () =>
+        {
+            //console.log('click on btnRect');
+            this.dispatchEvent( new CustomEvent('createRectangleRequest') );
+        }
+        this.btnCircle.onclick = () =>
+        {
+          this.dispatchEvent(new CustomEvent('createCircleRequest'));
+        }
+      this.btnTriangle.onclick = () =>
+      {
+          this.dispatchEvent(new CustomEvent('createTriangleRequest'));
+      }
+    }
+
+    static getDispatchedEvents()
+{
+    return ['createRectangleRequest', 'createCircleRequest', 'createTriangleRequest'];
+}
+
+    getDrawingContext2D()
+    {
+       return this.canvas.getContext("2d");
+    }
+
+    getFormData()
+    {
+        let dataObject =
+        {
+            color: this.colorInput.value,
+            selectedFigure: null
+        };
+
+        return dataObject;
+    }
+
+}
+
+customElements.define('applicationui-wc', ApplicationUI );
+
+class ApplicationModel extends EventTarget
+{
+    constructor()
+    {
+        super();
+        this.objects = new Map();
+    }
+
+    addObject( id, object )
+    {
+        this.objects.set(id, object);
+        this.dispatchEvent( new CustomEvent('modelchanged') );
+    }
+
+    getObject(id)
+    {
+        return this.objects.get(id);
+    }
+
+    getObjectIterator()
+    {
+        return this.objects.values();
+    }
+}
+
+class Rectangle
+{
+    constructor(x,y,w,h,color)
+    {
+        this.x = x;
+        this.y = y;
+        this.width = w;
+        this.height = h;
+        this.angle = 0;
+        this.color = color;
+    }
+
+    rotate( value )
+    {
+        this.angle = value;
+    }
+
+
+    draw(ctx)
+    {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.fillStyle = this.color;
+        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.restore();
+    }
+}
+
+class Circle
+{
+    constructor(x, y, radius, color)
+    {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+    }
+
+    draw(ctx)
+    {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
+class Triangle
+{
+    constructor(x, y, base, height, color)
+    {
+        this.x = x;
+        this.y = y;
+        this.base = base;
+        this.height = height;
+        this.color = color;
+    }
+
+    draw(ctx)
+    {
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - this.height/2); // Punto superior
+        ctx.lineTo(this.x - this.base/2, this.y + this.height/2); // Punto inferior izquierdo
+        ctx.lineTo(this.x + this.base/2, this.y + this.height/2); // Punto inferior derecho
+        ctx.closePath();
+        ctx.fillStyle = this.color;
+        ctx.fill();
+    }
+}
+
+class ApplicationController
+{
+    constructor( view, model )
+    {
+        this.view = view;
+        this.model = model;
+
+        this.ctx = this.view.getDrawingContext2D();
+    }
+
+    init()
+{
+    this.model.addEventListener('modelchanged', this.onModelChanged.bind(this));
+    this.view.addEventListener('createRectangleRequest', this.onCreateRectangleButtonClick.bind(this));
+    this.view.addEventListener('createCircleRequest', this.onCreateCircleButtonClick.bind(this));
+    this.view.addEventListener('createTriangleRequest', this.onCreateTriangleButtonClick.bind(this));
+}
+
+    release()
+    {
+        //this.view.removeEventListener()
+    }
+
+    //Estrategia 1: Procesar eventos de notificación del modelo
+    onModelChanged(event)
+    {
+        //Clear
+
+        //Drawing
+        for( let object of this.model.getObjectIterator() )
+        {
+            object.draw( this.ctx );
+        }
+    }
+
+    //Manejadores de eventos producidos desde la UI
+    onCreateRectangleButtonClick(event)
+    {
+        //Datos pedidos al usuario
+        let id = prompt('Ingrese ID:');
+        let width = prompt('Ingrese ancho:');
+        let height = prompt('Ingrese alto:');
+        let x = prompt('Ingrese x:');
+        let y = prompt('Ingrese y:');
+
+        //Datos pedidos a la interfaz
+        let color = this.view.getFormData().color;
+
+        //Acceso al modelo
+        let new_figure = new Rectangle(x,y,width,height,color)
+        this.model.addObject(id, new_figure);
+
+    }
+
+    onCreateCircleButtonClick(event)
+{
+    //Datos pedidos al usuario
+    let id = prompt('Ingrese ID:');
+    let radius = prompt('Ingrese radio:');
+    let x = prompt('Ingrese x:');
+    let y = prompt('Ingrese y:');
+
+    //Datos pedidos a la interfaz
+    let color = this.view.getFormData().color;
+
+    //Acceso al modelo
+    let new_figure = new Circle(x, y, radius, color);
+    this.model.addObject(id, new_figure);
+}
+
+    onCreateTriangleButtonClick(event)
+    {
+        //Datos pedidos al usuario
+        let id = prompt('Ingrese ID:');
+        let base = prompt('Ingrese base:');
+        let height = prompt('Ingrese altura:');
+        let x = prompt('Ingrese x:');
+        let y = prompt('Ingrese y:');
+
+        //Datos pedidos a la interfaz
+        let color = this.view.getFormData().color;
+
+        //Acceso al modelo
+        let new_figure = new Triangle(x, y, base, height, color);
+        this.model.addObject(id, new_figure);
+    }
+}
+
+
+function main()
+{
+     let model = new ApplicationModel();
+     let ui = new ApplicationUI();
+     let controller = new ApplicationController(ui, model);
+
+     controller.init();
+
+     document.body.appendChild(ui);
+}
+
+window.onload = main;
+
+</script>
+</html>

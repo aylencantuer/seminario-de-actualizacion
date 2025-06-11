@@ -1,16 +1,5 @@
 // ApplicationUI.js
 
-// ApplicationUI.js
-
-// Aquí irán cosas como:
-// - document.getElementById(...)
-// - input.value
-// - botones y eventos
-// - mensajes al usuario
-// y cualquier código que interactúe con HTML/DOM y llame a funciones del modelo
-
-
-
 function showUserMenu(username) {
   let userdata = isValidUserGetData(username);
   let option;
