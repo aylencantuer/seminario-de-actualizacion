@@ -1,5 +1,3 @@
-// ApplicationModel.js
-
 let authData = new Map();
 const maxLoginFailedAttempts = 3;
 
@@ -10,30 +8,10 @@ let articles = [
 ];
 
 let userData = [
-  {
-    password: '1234AYL!!.',
-    failedLoginCounter: 0,
-    isLocked: false,
-    role: 'ADMIN'
-  },
-  {
-    password: '1234AYL!!.',
-    failedLoginCounter: 0,
-    isLocked: false,
-    role: 'CLIENT'
-  },
-  {
-    password: '1234AYL!!.',
-    failedLoginCounter: 0,
-    isLocked: false,
-    role: 'SELLER'
-  },
-  {
-    password: '1234AYL!!.',
-    failedLoginCounter: 0,
-    isLocked: false,
-    role: 'WAREHOUSE'
-  }
+  { password: '1234AYL!!.', failedLoginCounter: 0, isLocked: false, role: 'ADMIN' },
+  { password: '1234AYL!!.', failedLoginCounter: 0, isLocked: false, role: 'CLIENT' },
+  { password: '1234AYL!!.', failedLoginCounter: 0, isLocked: false, role: 'SELLER' },
+  { password: '1234AYL!!.', failedLoginCounter: 0, isLocked: false, role: 'WAREHOUSE' }
 ];
 
 authData.set('scorpion', userData[0]);
@@ -41,16 +19,12 @@ authData.set('aylen', userData[1]);
 authData.set('Sandra', userData[2]);
 authData.set('Diego', userData[3]);
 
-
 function isValidUserGetData(username) {
   return authData.get(username);
 }
 
 function authenticateUser(username, password) {
-  let api_return = {
-    status: false,
-    result: null
-  };
+  let api_return = { status: false, result: null };
 
   if (username && password) {
     let userdata = isValidUserGetData(username);
@@ -92,8 +66,7 @@ function isValidPassword(password) {
 
 function listArticles() {
   if (articles.length === 0) {
-    alert("No hay artículos registrados.");
-    return;
+    return "No hay artículos registrados.";
   }
 
   let output = "Listado de artículos:\n";
@@ -101,103 +74,87 @@ function listArticles() {
     output += `ID: ${article.id} | Nombre: ${article.name} | Precio: $${article.price.toFixed(2)} | Stock: ${article.stock}\n`;
   });
 
-  alert(output);
+  console.log("DEBUG listArticles output:", output);
+
+  return output;
 }
 
-function createArticle() {
-  let id = parseInt(prompt("Ingrese ID del nuevo artículo:"));
+function createArticle(article) {
+  let { id, name, price, stock } = article;
+  id = parseInt(id);
+  price = parseFloat(price);
+  stock = parseInt(stock);
+
   if (isNaN(id) || articles.find(a => a.id === id)) {
-    alert("ID inválido o ya existente.");
-    return;
+    return "ID inválido o ya existente.";
   }
 
-  let name = prompt("Ingrese nombre del artículo:");
-  let price = parseFloat(prompt("Ingrese precio:")); 
-  let stock = parseInt(prompt("Ingrese stock:")); 
-
   if (!name || isNaN(price) || isNaN(stock)) {
-    alert("Datos inválidos.");
-    return;
+    return "Datos inválidos.";
   }
 
   articles.push({ id, name, price, stock });
-  alert("Artículo creado correctamente.");
+  return "Artículo creado correctamente.";
 }
 
-function editArticle() {
-  let id = parseInt(prompt("Ingrese ID del artículo a editar:"));
-  let article = articles.find(a => a.id === id); 
-
-  if (!article) {
-    alert("Artículo no encontrado.");
-    return;
-  }
-
-  let name = prompt(`Nombre actual: ${article.name}\nNuevo nombre (dejar vacío para mantener):`);
-  let price = prompt(`Precio actual: $${article.price}\nNuevo precio (dejar vacío para mantener):`);
-  let stock = prompt(`Stock actual: ${article.stock}\nNuevo stock (dejar vacío para mantener):`);
-
-  if (name) article.name = name;
-  if (price) {
-    let parsed = parseFloat(price);
-    if (!isNaN(parsed)) article.price = parsed;
-  }
-  if (stock) {
-    let parsed = parseInt(stock);
-    if (!isNaN(parsed)) article.stock = parsed;
-  }
-
-  alert("Artículo editado correctamente.");
-}
-
-function deleteArticle() {
-  let id = parseInt(prompt("Ingrese ID del artículo a eliminar:"));
-  let index = articles.findIndex(a => a.id === id);
-
-  if (index === -1) {
-    alert("Artículo no encontrado.");
-    return;
-  }
-
-  articles.splice(index, 1);
-  alert("Artículo eliminado correctamente.");
-}
-
-function purchaseArticle() {
-  let id = parseInt(prompt("Ingrese ID del artículo que desea comprar:"));
+function editArticle(articleUpdate) {
+  let { id, name, price, stock } = articleUpdate;
+  id = parseInt(id);
   let article = articles.find(a => a.id === id);
 
   if (!article) {
-    alert("Artículo no encontrado.");
-    return;
+    return "Artículo no encontrado.";
+  }
+
+  if (name) article.name = name;
+  if (!isNaN(parseFloat(price))) article.price = parseFloat(price);
+  if (!isNaN(parseInt(stock))) article.stock = parseInt(stock);
+
+  return "Artículo editado correctamente.";
+}
+
+function deleteArticle(id) {
+  let index = articles.findIndex(a => a.id === id);
+
+  if (index === -1) {
+    return "Artículo no encontrado.";
+  }
+
+  articles.splice(index, 1);
+  return "Artículo eliminado correctamente.";
+}
+
+function purchaseArticle(id) {
+  let article = articles.find(a => a.id === id);
+
+  if (!article) {
+    return "Artículo no encontrado.";
   }
 
   if (article.stock <= 0) {
-    alert("No hay stock disponible para este artículo.");
-    return;
+    return "No hay stock disponible para este artículo.";
   }
 
   let quantity = parseInt(prompt(`Ingrese cantidad a comprar (stock disponible: ${article.stock}):`));
-  
+
   if (isNaN(quantity) || quantity <= 0) {
-    alert("Cantidad inválida.");
-    return;
+    return "Cantidad inválida.";
   }
 
   if (quantity > article.stock) {
-    alert("No hay suficiente stock para esa cantidad.");
-    return;
+    return "No hay suficiente stock para esa cantidad.";
   }
 
   let confirmPurchase = confirm(`Confirmar compra de ${quantity} unidad(es) de "${article.name}" por un total de $${(article.price * quantity).toFixed(2)}?`);
-  
+
   if (confirmPurchase) {
     article.stock -= quantity;
-    alert(`Compra realizada con éxito. Stock restante: ${article.stock}`);
+    return `Compra realizada con éxito. Stock restante: ${article.stock}`;
   } else {
-    alert("Compra cancelada.");
+    return "Compra cancelada.";
   }
 }
+
 
 function hasPermission(username, action) {
   const role = authData.get(username)?.role;
@@ -216,3 +173,45 @@ function canCreateUser(username) {
   let user = authData.get(username);
   return user?.role === 'ADMIN';
 }
+
+function handleRequestFromProxy({ username, action, article, id }) {
+  const user = authData.get(username);
+  if (!user || user.isLocked) {
+    return { status: false, result: 'ACCESS_DENIED' };
+  }
+
+  switch (action) {
+    case 'LIST':
+      if (hasPermission(username, 'LIST')) {
+        return { status: true, result: listArticles() };
+      }
+      break;
+
+    case 'CREATE':
+      if (hasPermission(username, 'CREATE')) {
+        return { status: true, result: createArticle(article) };
+      }
+      break;
+
+    case 'EDIT':
+      if (hasPermission(username, 'EDIT')) {
+        return { status: true, result: editArticle(article) };
+      }
+      break;
+
+    case 'DELETE':
+      if (hasPermission(username, 'DELETE')) {
+        return { status: true, result: deleteArticle(id) };
+      }
+      break;
+
+    case 'PURCHASE':
+      if (hasPermission(username, 'PURCHASE')) {
+        return { status: true, result: purchaseArticle(id) };
+      }
+      break;
+  }
+
+  return { status: false, result: 'PERMISSION_DENIED' };
+}
+

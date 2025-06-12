@@ -31,7 +31,7 @@ function showUserMenu(username) {
 
 function manageArticles() {
   let option;
-  let username = prompt("Confirme su nombre de usuario:"); // necesario para evaluar permisos
+  const username = prompt("Confirme su nombre de usuario:");
 
   if (!authData.has(username)) {
     alert("Usuario inválido.");
@@ -50,48 +50,85 @@ function manageArticles() {
     ).toUpperCase();
 
     switch (option) {
-      case "1":
-        if (hasPermission(username, 'LIST')) {
-          listArticles();
+      case "1": {
+        const res = requestToBackend(username, "LIST");
+        if (res.status) {
+          alert(res.result); // o showArticles(res.result) si tenés esa función definida
         } else {
-          alert("No tiene permiso para listar artículos.");
+          alert("No tiene permiso o ocurrió un error.");
         }
+        break;
+      }
+
+      case "2": {
+        const newArticle = getArticleInput(); // Asegurate de que devuelva un objeto válido
+        const res = requestToBackend(username, "CREATE", { article: newArticle });
+        alert(res.status ? "Artículo creado correctamente." : "Permiso denegado o error.");
+        break;
+      }
+
+      case "3": {
+        const articleToEdit = getArticleInput(); // Debe contener ID y nuevos valores
+        const res = requestToBackend(username, "EDIT", { article: articleToEdit });
+        alert(res.status ? "Artículo editado correctamente." : "Permiso denegado o error.");
+        break;
+      }
+
+      case "4": {
+        const idToDelete = prompt("Ingrese el ID del artículo a eliminar:");
+        const res = requestToBackend(username, "DELETE", { id: parseInt(idToDelete) });
+        alert(res.status ? "Artículo eliminado correctamente." : "Permiso denegado o error.");
+        break;
+      }
+
+      case "5": {
+        const idToBuy = prompt("Ingrese el ID del artículo a comprar:");
+        const res = requestToBackend(username, "PURCHASE", { id: parseInt(idToBuy) });
+        alert(res.status ? "Compra realizada con éxito." : "Permiso denegado o error.");
+        break;
+      }
+
+      case "X":
         break;
 
-      case "2":
-        if (hasPermission(username, 'CREATE')) {
-          createArticle();
-        } else {
-          alert("No tiene permiso para crear artículos.");
-        }
-        break;
-
-      case "3":
-        if (hasPermission(username, 'EDIT')) {
-          editArticle();
-        } else {
-          alert("No tiene permiso para editar artículos.");
-        }
-        break;
-
-      case "4":
-        if (hasPermission(username, 'DELETE')) {
-          deleteArticle();
-        } else {
-          alert("No tiene permiso para eliminar artículos.");
-        }
-        break;
-
-      case "5":
-        if (hasPermission(username, 'PURCHASE')) {
-          purchaseArticle();
-        } else {
-          alert("No tiene permiso para comprar artículos.");
-        }
-        break;
+      default:
+        alert("Opción inválida.");
     }
   } while (option !== "X");
 }
+
+        /*
+         Solicita al usuario los datos necesarios para crear o editar un artículo.
+        Devuelve un objeto { name, price, stock } si todo es válido, o null si se cancela.El backend (simulado por handleRequestFromProxy) responde con un objeto que típicamente tiene esta estructura:
+
+          {
+            status: true,               // indica si la operación fue exitosa
+            result: [...],              // contiene los artículos, mensaje, o null según el caso
+            message: "OK"               // opcional: puede ser "Permiso denegado", "Artículo no encontrado", etc.
+          } */
+
+      
+
+
+function getArticleInput() {
+  let name = prompt("Ingrese el nombre del artículo:");
+  if (!name) return null;
+
+  let price = parseFloat(prompt("Ingrese el precio del artículo:"));
+  if (isNaN(price) || price <= 0) {
+    alert("Precio inválido.");
+    return null;
+  }
+
+  let stock = parseInt(prompt("Ingrese el stock inicial del artículo:"), 10);
+  if (isNaN(stock) || stock < 0) {
+    alert("Stock inválido.");
+    return null;
+  }
+
+  return { name, price, stock };
+}
+
 
 function GUI_login() {
   let username = window.prompt("Ingrese su nombre de usuario:");
@@ -189,3 +226,5 @@ function main() {
 }
 
 window.onload = main;
+
+handle
