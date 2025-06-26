@@ -85,6 +85,7 @@ function createArticle(article) {
   price = parseFloat(price);
   stock = parseInt(stock);
 
+  // Asegurarse de que el ID sea un número válido y no exista ya
   if (isNaN(id) || articles.find(a => a.id === id)) {
     return "ID inválido o ya existente.";
   }
@@ -185,6 +186,7 @@ function handleRequestFromProxy({ username, action, article, id }) {
   }
 
   switch (action) {
+
     case 'LIST':
       if (hasPermission(username, 'LIST')) {
         return { status: true, result: listArticles() };
@@ -216,13 +218,14 @@ function handleRequestFromProxy({ username, action, article, id }) {
       break;
 
     case 'GET_DETAILS':
-      const foundArticle = getArticleById(id);
-      if (foundArticle) {
-          return { status: true, result: foundArticle };
-      } else {
-          return { status: false, result: 'ARTICLE_NOT_FOUND' };
-      }
-      break;
+        const foundArticle = getArticleById(id);
+        if (foundArticle) {
+            return { status: true, result: foundArticle };
+        } else {
+            return { status: false, result: 'ARTICLE_NOT_FOUND' };
+        }
+        break;
+
   }
 
   return { status: false, result: 'PERMISSION_DENIED' };

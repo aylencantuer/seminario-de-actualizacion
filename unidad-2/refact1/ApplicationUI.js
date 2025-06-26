@@ -7,9 +7,10 @@ function showUserMenu(username) {
   do {
     option = window.prompt("Menú de acciones:\n1. Cambiar contraseña\n2. Gestión de artículos\nX. Salir");
 
-    if(option === null) {
-      option = "X";
-    }else{
+    // Manejar caso donde el usuario cancela el prompt
+    if (option === null) {
+      option = "X"; // Considerar como "Salir" si el usuario cancela
+    } else {
       option = option.toUpperCase();
     }
 
@@ -17,9 +18,9 @@ function showUserMenu(username) {
       case "1":
         let newPassword = window.prompt("Ingrese nueva contraseña:");
 
-        if (newPassword === null || newPassword === "") {
+        if (newPassword === null || newPassword === "") { // También verificar si es null por cancelación
           alert("La contraseña no puede estar vacía.");
-        } else if (!isValidPassword(newPassword)) {
+        } else if (!isValidPassword(newPassword)) { // isValidPassword está en ApplicationModel.js
           alert("La contraseña debe tener entre 8 y 16 caracteres alfanuméricos, al menos una mayúscula y al menos 2 símbolos especiales.");
         } else {
           userdata.password = newPassword;
@@ -37,9 +38,11 @@ function showUserMenu(username) {
 
 function manageArticles() {
   let option;
+  // Es importante que 'authData' esté accesible aquí, lo cual es el caso por el orden de carga de scripts.
   const username = prompt("Confirme su nombre de usuario:");
 
-  if (!username || !authData.has(username)) {
+  // Verificar si el usuario es válido antes de proceder
+  if (!username || !authData.has(username)) { // authData está en ApplicationModel.js
     alert("Usuario inválido.");
     return;
   }
@@ -53,7 +56,7 @@ function manageArticles() {
       "4. Eliminar artículo\n" +
       "5. Comprar artículo\n" +
       "X. Volver"
-    )
+    );
 
     // Manejar caso donde el usuario cancela el prompt
     if (option === null) {
@@ -64,19 +67,23 @@ function manageArticles() {
 
     switch (option) {
       case "1": {
-        const res = window.proxyListArticles(username);
+        // Usar la función del proxy para listar artículos
+        const res = window.proxyListArticles(username); //
         if (res.status) {
-          alert(res.result); // o showArticles(res.result) si tenés esa función definida
+          alert(res.result);
         } else {
-          alert("No tiene permiso o ocurrió un error." + res.result);
+          alert("No tiene permiso o ocurrió un error: " + res.result);
         }
         break;
       }
 
       case "2": {
+        // Asegúrate de que getArticleInput devuelva un objeto con name, price y stock,
+        // o null si se cancela.
         const newArticle = getArticleInput();
-        if (newArticle) { 
-          const res = window.proxyCreateArticle(username, newArticle);
+        if (newArticle) { // Solo si el usuario proporcionó datos válidos
+          // Usar la función del proxy para crear artículo
+          const res = window.proxyCreateArticle(username, newArticle); //
           alert(res.status ? "Artículo creado correctamente." : "Permiso denegado o error: " + res.result);
         } else {
           alert("Creación de artículo cancelada o datos inválidos.");
@@ -108,7 +115,7 @@ function manageArticles() {
         let articleUpdate = { id: idToEdit };
 
         if (articleName !== null && articleName !== "") articleUpdate.name = articleName;
-        
+
         if (articlePrice !== null && articlePrice !== "") {
           const parsedPrice = parseFloat(articlePrice);
           if (!isNaN(parsedPrice)) articleUpdate.price = parsedPrice;
@@ -130,6 +137,7 @@ function manageArticles() {
         break;
       }
 
+
       case "4": {
         const idToDelete = prompt("Ingrese el ID del artículo a eliminar:");
         if (idToDelete === null || isNaN(parseInt(idToDelete))) {
@@ -141,7 +149,6 @@ function manageArticles() {
         alert(res.status ? "Artículo eliminado correctamente." : "Permiso denegado o error: " + res.result);
         break;
       }
-
 
       case "5": {
         const idToBuy = prompt("Ingrese el ID del artículo a comprar:");
@@ -164,38 +171,41 @@ function manageArticles() {
   } while (option !== "X");
 }
 
-        /*
-         Solicita al usuario los datos necesarios para crear o editar un artículo.
-        Devuelve un objeto { name, price, stock } si todo es válido, o null si se cancela.El backend (simulado por handleRequestFromProxy) responde con un objeto que típicamente tiene esta estructura:
+/*
+ Solita al usuario los datos necesarios para crear o editar un artículo.
+ Devuelve un objeto { name, price, stock } si todo es válido, o null si se cancela.
+ El backend (simulado por handleRequestFromProxy) responde con un objeto que típicamente tiene esta estructura:
 
-          {
-            status: true,               // indica si la operación fue exitosa
-            result: [...],              // contiene los artículos, mensaje, o null según el caso
-            message: "OK"               // opcional: puede ser "Permiso denegado", "Artículo no encontrado", etc.
-          } */
+   {
+     status: true,               // indica si la operación fue exitosa
+     result: [...],              // contiene los artículos, mensaje, o null según el caso
+     message: "OK"               // opcional: puede ser "Permiso denegado", "Artículo no encontrado", etc.
+   } */
 
 function getArticleInput() {
   let name = prompt("Ingrese el nombre del artículo:");
-  if (name === null || name === "") return null;
+  if (name === null) return null; // Si el usuario cancela
 
   let priceInput = prompt("Ingrese el precio del artículo:");
-  if (priceInput === null) return null;
+  if (priceInput === null) return null; // Si el usuario cancela
   let price = parseFloat(priceInput);
   if (isNaN(price) || price <= 0) {
     alert("Precio inválido.");
     return null;
   }
 
-  let stockInput = prompt("Ingrese el stock inicial del artículo:", 0);
-  if (stockInput === null) return null; 
-  let stock = parseInt(stockInput, 0);
+  let stockInput = prompt("Ingrese el stock inicial del artículo:", 10); // Valor por defecto
+  if (stockInput === null) return null; // Si el usuario cancela
+  let stock = parseInt(stockInput, 10);
   if (isNaN(stock) || stock < 0) {
     alert("Stock inválido.");
     return null;
   }
-
+  // Para el caso de crear, necesitamos el ID. En la implementación original de Model,
+  // el ID se valida si ya existe y se parsea a int.
+  // Aquí, podríamos pedirlo al usuario o generarlo. Para el ejemplo, pidámoslo.
   let idInput = prompt("Ingrese el ID del nuevo artículo:");
-  if (idInput === null) return null;
+  if (idInput === null) return null; // Si el usuario cancela
   let id = parseInt(idInput);
   if (isNaN(id)) {
     alert("ID inválido.");
@@ -205,11 +215,13 @@ function getArticleInput() {
   return { id, name, price, stock };
 }
 
-
 function GUI_login() {
   let username = window.prompt("Ingrese su nombre de usuario:");
+  if (username === null) return; // Si el usuario cancela
   let password = window.prompt("Ingrese contraseña:");
+  if (password === null) return; // Si el usuario cancela
 
+  // authenticateUser está en ApplicationModel.js
   let api_return = authenticateUser(username, password);
 
   if (api_return.status) {
@@ -230,12 +242,15 @@ function GUI_login() {
 }
 
 function GUI_register(adminUsername) {
+  // canCreateUser y authData están en ApplicationModel.js
   if (!canCreateUser(adminUsername)) {
     alert("Acceso denegado. Solo administradores pueden crear cuentas.");
     return;
   }
 
-  let role = prompt("Ingrese rol de usuario (ADMIN, CLIENT, SELLER, WAREHOUSE):").toUpperCase();
+  let role = prompt("Ingrese rol de usuario (ADMIN, CLIENT, SELLER, WAREHOUSE):");
+  if (role === null) return; // Si el usuario cancela
+  role = role.toUpperCase();
 
   if (!['ADMIN', 'CLIENT', 'SELLER', 'WAREHOUSE'].includes(role)) {
     alert("Rol inválido.");
@@ -243,19 +258,22 @@ function GUI_register(adminUsername) {
   }
 
   let username = window.prompt("Ingrese nuevo nombre de usuario:");
-
-  if (!username || authData.has(username)) {
+  // authData está en ApplicationModel.js
+  if (username === null || username === "" || authData.has(username)) {
     alert("Nombre de usuario inválido o ya existente.");
     return;
   }
 
   let password = window.prompt("Ingrese contraseña:");
+  if (password === null) return; // Si el usuario cancela
 
+  // isValidPassword está en ApplicationModel.js
   if (!isValidPassword(password)) {
     alert("La contraseña debe tener entre 8 y 16 caracteres alfanuméricos, al menos una mayúscula y al menos 2 símbolos especiales.");
     return;
   }
 
+  // authData está en ApplicationModel.js
   authData.set(username, {
     password: password,
     failedLoginCounter: 0,
@@ -270,7 +288,14 @@ function GUI_mainMenu() {
   let option;
 
   do {
-    option = window.prompt("Menú principal:\n1. Iniciar sesión\n2. Crear cuenta (solo Admin)\nX. Salir").toUpperCase();
+    option = window.prompt("Menú principal:\n1. Iniciar sesión\n2. Crear cuenta (solo Admin)\nX. Salir");
+
+    // Manejar caso donde el usuario cancela el prompt
+    if (option === null) {
+      option = "X"; // Considerar como "Salir"
+    } else {
+      option = option.toUpperCase();
+    }
 
     switch (option) {
       case "1":
@@ -279,11 +304,15 @@ function GUI_mainMenu() {
 
       case "2":
         let adminUser = prompt("Ingrese nombre de usuario administrador:");
+        if (adminUser === null) break; // Si el usuario cancela
         let adminPass = prompt("Ingrese contraseña:");
+        if (adminPass === null) break; // Si el usuario cancela
 
+        // authenticateUser está en ApplicationModel.js
         let result = authenticateUser(adminUser, adminPass);
 
         if (result.status) {
+          // canCreateUser está en ApplicationModel.js
           if (canCreateUser(adminUser)) {
             GUI_register(adminUser);
           } else {
@@ -302,3 +331,6 @@ function main() {
 }
 
 window.onload = main;
+
+// **ELIMINAR ESTA LÍNEA O CORREGIRLA SI TENÍA UN PROPÓSITO:**
+// handle
