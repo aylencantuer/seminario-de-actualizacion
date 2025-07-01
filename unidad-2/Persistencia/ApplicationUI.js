@@ -1,4 +1,5 @@
 // ApplicationUI.js
+import { authenticateUser, isValidUserGetData, isValidPassword, updateUserPassword, canCreateUser, registerUser, authData } from './ApplicationModel.js';
 
 function showUserMenu(username) {
   let userdata = isValidUserGetData(username);
@@ -14,18 +15,23 @@ function showUserMenu(username) {
     }
 
     switch (option) {
-      case "1":
-        let newPassword = window.prompt("Ingrese nueva contraseña:");
 
-        if (newPassword === null || newPassword === "") {
-          alert("La contraseña no puede estar vacía.");
-        } else if (!isValidPassword(newPassword)) {
-          alert("La contraseña debe tener entre 8 y 16 caracteres alfanuméricos, al menos una mayúscula y al menos 2 símbolos especiales.");
-        } else {
-          userdata.password = newPassword;
+    case "1":
+      let newPassword = window.prompt("Ingrese nueva contraseña:");
+
+      if (newPassword === null || newPassword === "") {
+        alert("La contraseña no puede estar vacía.");
+      } else if (!isValidPassword(newPassword)) {
+        alert("La contraseña debe tener entre 8 y 16 caracteres alfanuméricos, al menos una mayúscula y al menos 2 símbolos especiales.");
+      } else {
+        const updateSuccess = updateUserPassword(username, newPassword);
+        if (updateSuccess) {
           alert("Contraseña cambiada exitosamente.");
+        } else {
+          alert("Error al cambiar la contraseña. Usuario no encontrado.");
         }
-        break;
+      }
+      break;
 
       case "2":
         manageArticles();
@@ -256,14 +262,14 @@ function GUI_register(adminUsername) {
     return;
   }
 
-  authData.set(username, {
-    password: password,
-    failedLoginCounter: 0,
-    isLocked: false,
-    role: role
-  });
+  // LLAMADA A LA FUNCIÓN DEL MODELO PARA REGISTRAR Y PERSISTIR
+  const registrationResult = registerUser(username, password, role);
 
-  alert("Cuenta creada exitosamente.");
+  if (registrationResult.status) {
+    alert("Cuenta creada exitosamente.");
+  } else {
+    alert("Error al crear la cuenta: " + (registrationResult.result === 'USER_ALREADY_EXISTS' ? "El nombre de usuario ya existe." : "Error desconocido."));
+  }
 }
 
 function GUI_mainMenu() {

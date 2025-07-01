@@ -1,5 +1,7 @@
 // ApplicationProxy.js
 
+import { handleRequestFromProxy } from './ApplicationModel.js';
+
 /*Implementaremos un proxy entre el frontend y el backend para que toda la validación de permisos y acciones como 
 listar, crear, editar, eliminar o comprar artículos se gestionen exclusivamente desde el backend.
 

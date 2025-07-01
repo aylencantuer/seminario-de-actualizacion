@@ -1,25 +1,34 @@
 import { saveToSessionStorage, loadFromSessionStorage } from './SessionStorageManager.js';
 
-let authData = new Map();
 const maxLoginFailedAttempts = 3;
 
-let articles = [
-  { id: 1, name: "Lavandina x 1L", price: 875.25, stock: 3000 },
-  { id: 4, name: "Detergente x 500mL", price: 1102.45, stock: 2010 },
-  { id: 22, name: "Jabón en polvo x 250g", price: 650.22, stock: 407 }
-];
-
-let userData = [
+//Cargar authData desde sessionStorage, si no existe, usar valores por defecto
+let authData = loadFromSessionStorage('authData', true); // true indica que esperamos un Map
+if (!authData) {
+  authData = new Map();
+let userDataDefault = [
   { password: '1234AYL!!.', failedLoginCounter: 0, isLocked: false, role: 'ADMIN' },
   { password: '1234AYL!!.', failedLoginCounter: 0, isLocked: false, role: 'CLIENT' },
   { password: '1234AYL!!.', failedLoginCounter: 0, isLocked: false, role: 'SELLER' },
   { password: '1234AYL!!.', failedLoginCounter: 0, isLocked: false, role: 'WAREHOUSE' }
 ];
+authData.set('scorpion', userDataDefault[0]);
+authData.set('aylen', userDataDefault[1]);
+authData.set('Sandra', userDataDefault[2]);
+authData.set('Diego', userDataDefault[3]);
+saveToSessionStorage('authData', authData);// Guardar los valores por defecto si no existían
+}
 
-authData.set('scorpion', userData[0]);
-authData.set('aylen', userData[1]);
-authData.set('Sandra', userData[2]);
-authData.set('Diego', userData[3]);
+// 2. Cargar articles desde sessionStorage, si no existen, usar valores por defecto
+let articles = loadFromSessionStorage('articles'); 
+if (!articles) {
+  articles = [
+    { id: 1, name: "Lavandina x 1L", price: 875.25, stock: 3000 },
+    { id: 4, name: "Detergente x 500mL", price: 1102.45, stock: 2010 },
+    { id: 22, name: "Jabón en polvo x 250g", price: 650.22, stock: 407 }
+  ];
+  saveToSessionStorage('articles', articles); 
+}
 
 function isValidUserGetData(username) {
   return authData.get(username);
@@ -35,11 +44,18 @@ function authenticateUser(username, password) {
       if (!userdata.isLocked) {
         if (userdata.password === password) {
           api_return.status = true;
+          // Resetear contador de intentos fallidos si el login es exitoso
+          if (userdata.failedLoginCounter > 0) {
+            userdata.failedLoginCounter = 0;
+            saveToSessionStorage('authData', authData); // Guardar cambio en authData
+          }
         } else {
           userdata.failedLoginCounter++;
+          saveToSessionStorage('authData', authData); // Guardar cambio en authData
 
           if (userdata.failedLoginCounter >= maxLoginFailedAttempts) {
             userdata.isLocked = true;
+            saveToSessionStorage('authData', authData); // Guardar cambio en authData
             api_return.result = 'BLOCKED_USER';
           } else {
             api_return.result = 'USER_PASSWORD_FAILED';
@@ -56,6 +72,21 @@ function authenticateUser(username, password) {
   return api_return;
 }
 
+function registerUser(username, password, role) {
+  if (authData.has(username)) {
+    return { status: false, result: 'USER_ALREADY_EXISTS' };
+  }
+
+  authData.set(username, {
+    password: password,
+    failedLoginCounter: 0,
+    isLocked: false,
+    role: role
+  });
+  saveToSessionStorage('authData', authData);
+  return { status: true, result: 'USER_CREATED_SUCCESSFULLY' };
+}
+
 function isValidPassword(password) {
   const lengthOk = password.length >= 8 && password.length <= 16;
   const hasUppercase = /[A-Z]/.test(password);
@@ -64,6 +95,17 @@ function isValidPassword(password) {
   const hasTwoSpecials = specialChars.length >= 2;
 
   return lengthOk && hasUppercase && hasAlphanumeric && hasTwoSpecials;
+}
+
+//Actualizar la contraseña y persistir el cambio
+function updateUserPassword(username, newPassword) {
+  const userdata = authData.get(username);
+  if (userdata) {
+    userdata.password = newPassword;
+    saveToSessionStorage('authData', authData);
+    return true; 
+  }
+  return false; 
 }
 
 function listArticles() {
@@ -96,6 +138,7 @@ function createArticle(article) {
   }
 
   articles.push({ id, name, price, stock });
+  saveToSessionStorage('articles', articles); 
   return "Artículo creado correctamente.";
 }
 
@@ -112,6 +155,7 @@ function editArticle(articleUpdate) {
   if (!isNaN(parseFloat(price))) article.price = parseFloat(price);
   if (!isNaN(parseInt(stock))) article.stock = parseInt(stock);
 
+  saveToSessionStorage('articles', articles);
   return "Artículo editado correctamente.";
 }
 
@@ -123,6 +167,7 @@ function deleteArticle(id) {
   }
 
   articles.splice(index, 1);
+  saveToSessionStorage('articles', articles);
   return "Artículo eliminado correctamente.";
 }
 
@@ -151,6 +196,7 @@ function purchaseArticle(id) {
 
   if (confirmPurchase) {
     article.stock -= quantity;
+    saveToSessionStorage('articles', articles);
     return `Compra realizada con éxito. Stock restante: ${article.stock}`;
   } else {
     return "Compra cancelada.";
@@ -230,3 +276,21 @@ function handleRequestFromProxy({ username, action, article, id }) {
   return { status: false, result: 'PERMISSION_DENIED' };
 }
 
+export {
+  isValidUserGetData,
+  authenticateUser,
+  isValidPassword,
+  listArticles,
+  createArticle,
+  editArticle,
+  deleteArticle,
+  purchaseArticle,
+  hasPermission,
+  canCreateUser,
+  getArticleById,
+  handleRequestFromProxy,
+  updateUserPassword,
+  registerUser,
+  authData,
+  articles
+};
