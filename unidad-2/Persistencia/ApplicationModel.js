@@ -1,9 +1,31 @@
-import { saveToSessionStorage, loadFromSessionStorage } from './SessionStorageManager.js';
+import { saveData, loadFromSessionStorage } from './SessionStorageManager.js';
+import { saveToLocalStorage, loadFromLocalStorage } from './LocalStorageManager.js';
+
+// --- CONFIGURACIÓN DE ALMACENAMIENTO ---
+// Cambia esta variable para seleccionar el tipo de almacenamiento:
+// 'sessionStorage' para usar Session Storage o 'localStorage'
+const STORAGE_TYPE = 'sessionStorage';
+
+let saveData;
+let loadData;
+
+// Asigna las funciones según el tipo de almacenamiento configurado
+if (STORAGE_TYPE === 'sessionStorage') {
+  saveData = saveData;
+  loadData = loadFromSessionStorage;
+} else if (STORAGE_TYPE === 'localStorage') {
+  saveData = saveToLocalStorage;
+  loadData = loadFromLocalStorage;
+} else {
+  console.error('Tipo de almacenamiento no válido. Usando sessionStorage por defecto.');
+  saveData = saveData;
+  loadData = loadFromSessionStorage;
+}
 
 const maxLoginFailedAttempts = 3;
 
 //Cargar authData desde sessionStorage, si no existe, usar valores por defecto
-let authData = loadFromSessionStorage('authData', true); // true indica que esperamos un Map
+let authData = loadData('authData', true); // true indica que esperamos un Map
 if (!authData) {
   authData = new Map();
 let userDataDefault = [
@@ -16,18 +38,18 @@ authData.set('scorpion', userDataDefault[0]);
 authData.set('aylen', userDataDefault[1]);
 authData.set('Sandra', userDataDefault[2]);
 authData.set('Diego', userDataDefault[3]);
-saveToSessionStorage('authData', authData);// Guardar los valores por defecto si no existían
+saveData('authData', authData);// Guardar los valores por defecto si no existían
 }
 
 // 2. Cargar articles desde sessionStorage, si no existen, usar valores por defecto
-let articles = loadFromSessionStorage('articles'); 
+let articles = loadData('articles'); 
 if (!articles) {
   articles = [
     { id: 1, name: "Lavandina x 1L", price: 875.25, stock: 3000 },
     { id: 4, name: "Detergente x 500mL", price: 1102.45, stock: 2010 },
     { id: 22, name: "Jabón en polvo x 250g", price: 650.22, stock: 407 }
   ];
-  saveToSessionStorage('articles', articles); 
+  saveData('articles', articles); 
 }
 
 function isValidUserGetData(username) {
@@ -47,15 +69,15 @@ function authenticateUser(username, password) {
           // Resetear contador de intentos fallidos si el login es exitoso
           if (userdata.failedLoginCounter > 0) {
             userdata.failedLoginCounter = 0;
-            saveToSessionStorage('authData', authData); // Guardar cambio en authData
+            saveData('authData', authData); // Guardar cambio en authData
           }
         } else {
           userdata.failedLoginCounter++;
-          saveToSessionStorage('authData', authData); // Guardar cambio en authData
+          saveData('authData', authData); // Guardar cambio en authData
 
           if (userdata.failedLoginCounter >= maxLoginFailedAttempts) {
             userdata.isLocked = true;
-            saveToSessionStorage('authData', authData); // Guardar cambio en authData
+            saveData('authData', authData); // Guardar cambio en authData
             api_return.result = 'BLOCKED_USER';
           } else {
             api_return.result = 'USER_PASSWORD_FAILED';
@@ -83,7 +105,7 @@ function registerUser(username, password, role) {
     isLocked: false,
     role: role
   });
-  saveToSessionStorage('authData', authData);
+  saveData('authData', authData);
   return { status: true, result: 'USER_CREATED_SUCCESSFULLY' };
 }
 
@@ -102,7 +124,7 @@ function updateUserPassword(username, newPassword) {
   const userdata = authData.get(username);
   if (userdata) {
     userdata.password = newPassword;
-    saveToSessionStorage('authData', authData);
+    saveData('authData', authData);
     return true; 
   }
   return false; 
@@ -138,7 +160,7 @@ function createArticle(article) {
   }
 
   articles.push({ id, name, price, stock });
-  saveToSessionStorage('articles', articles); 
+  saveData('articles', articles); 
   return "Artículo creado correctamente.";
 }
 
@@ -155,7 +177,7 @@ function editArticle(articleUpdate) {
   if (!isNaN(parseFloat(price))) article.price = parseFloat(price);
   if (!isNaN(parseInt(stock))) article.stock = parseInt(stock);
 
-  saveToSessionStorage('articles', articles);
+  saveData('articles', articles);
   return "Artículo editado correctamente.";
 }
 
@@ -167,7 +189,7 @@ function deleteArticle(id) {
   }
 
   articles.splice(index, 1);
-  saveToSessionStorage('articles', articles);
+  saveData('articles', articles);
   return "Artículo eliminado correctamente.";
 }
 
@@ -196,7 +218,7 @@ function purchaseArticle(id) {
 
   if (confirmPurchase) {
     article.stock -= quantity;
-    saveToSessionStorage('articles', articles);
+    saveData('articles', articles);
     return `Compra realizada con éxito. Stock restante: ${article.stock}`;
   } else {
     return "Compra cancelada.";
