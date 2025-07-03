@@ -1,0 +1,1 @@
+hubiera sido mejor trabajar con objetos en el archivo ApplicationModel? o ya esta siuficientemente modularizado por la separacion en archivos?
