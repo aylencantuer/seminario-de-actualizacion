@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>   </title>
+	</head>
+	<body>
+	</body>
+
+	<script>
+
+	class CustomCalculator extends HTMLElement
+	{
+		constructor()
+		{
+			super();
+
+			this.display = document.createElement('input');
+
+			this.btn0 = document.createElement('button');
+			this.btn1 = document.createElement('button');
+			this.btn2 = document.createElement('button');
+			this.btn3 = document.createElement('button');
+			this.btn4 = document.createElement('button');
+			this.btn5 = document.createElement('button');
+			this.btn6 = document.createElement('button');
+			this.btn7 = document.createElement('button');
+			this.btn8 = document.createElement('button');
+			this.btn9 = document.createElement('button');
+
+			this.btnAdd = document.createElement('button');
+			this.btnSubstract = document.createElement('button');
+			this.btnDivide = document.createElement('button');
+			this.btnMultiply = document.createElement('button');
+			this.btnCalculate = document.createElement('button');
+
+			this.btnDot = document.createElement('button');
+		
+			this.btnClear = document.createElement('button');
+
+			this.display.type = 'text';
+			this.btn0.innerText = '0';
+			this.btn1.innerText = '1';
+			this.btn2.innerText = '2';
+			this.btn3.innerText = '3';
+			this.btn4.innerText = '4';
+			this.btn5.innerText = '5';
+			this.btn6.innerText = '6';
+			this.btn7.innerText = '7';
+			this.btn8.innerText = '8';
+			this.btn9.innerText = '9';
+			this.btnAdd.innerText = '+';
+			this.btnSubstract.innerText = '-';
+			this.btnDivide.innerText = '/';
+			this.btnMultiply.innerText = 'x';
+			this.btnCalculate.innerText = '=';			
+			this.btnDot.innerText = '.';
+			this.btnClear.innerText = 'C';
+		}
+
+
+		onButton0Click(event)
+		{
+			this.display.value+='0';
+		}
+		onButton1Click(event)
+		{
+			this.display.value += '1';
+		}
+		onButton2Click(event)
+		{
+			this.display.value += '2';
+		}
+		onButton3Click(event)
+		{
+			this.display.value += '3';
+		}
+		onButton4Click(event)
+		{
+			this.display.value += '4';
+		}
+		onButton5Click(event)
+		{
+			this.display.value += '5';
+		}
+		onButton6Click(event)
+		{
+			this.display.value += '6';
+		}
+		onButton7Click(event)
+		{
+			this.display.value += '7';
+		}
+		onButton8Click(event)
+		{
+			this.display.value += '8';
+		}
+		onButton9Click(event)
+		{
+			this.display.value += '9';
+		}
+
+
+
+		onButtonAddClick(event)
+		{
+			this.display.value += '+';
+		}
+		onButtonSubstractClick(event)
+		{
+			this.display.value += '-';
+		}
+		onButtonDivideClick(event)
+		{
+			this.display.value += '/';
+		}
+		onButtonMultiplyClick(event)
+		{
+			this.display.value += '*';
+		}
+		
+		onButtonCalculateClick(event)
+		{
+			this.display.value = eval(this.display.value);
+		}
+
+		onButtonDotClick(event)
+		{
+			this.display.value += '.';
+		}
+		onButtonClearClick(event)
+		{
+			this.display.value = '';
+		}
+
+		connectedCallback()
+		{
+			//Se va a ejecutar siempre cuando el elemento es insertado en el DOM
+			//DOM = Arbol de elementos HTML ya como instancias (objetos) de JS.
+
+	
+			this.appendChild(this.display);
+			this.appendChild(this.btn0);
+			this.appendChild(this.btn1);
+			this.appendChild(this.btn2);
+			this.appendChild(this.btn3);
+			this.appendChild(this.btn4);
+			this.appendChild(this.btn5);
+			this.appendChild(this.btn6);
+			this.appendChild(this.btn7);
+			this.appendChild(this.btn8);
+			this.appendChild(this.btn9);
+			this.appendChild(this.btnAdd);
+			this.appendChild(this.btnSubstract);
+			this.appendChild(this.btnDivide);
+			this.appendChild(this.btnMultiply);
+			this.appendChild(this.btnCalculate);
+			this.appendChild(this.btnDot);
+			this.appendChild(this.btnClear);
+
+
+
+			this.btn0.onclick = this.onButton0Click.bind(this);//bind "enlaza" una función a un objeto específico,
+			this.btn1.onclick = this.onButton1Click.bind(this);
+			this.btn2.onclick = this.onButton2Click.bind(this);
+			this.btn3.onclick = this.onButton3Click.bind(this);
+			this.btn4.onclick = this.onButton4Click.bind(this);
+			this.btn5.onclick = this.onButton5Click.bind(this);
+			this.btn6.onclick = this.onButton6Click.bind(this);
+			this.btn7.onclick = this.onButton7Click.bind(this);
+			this.btn8.onclick = this.onButton8Click.bind(this);
+			this.btn9.onclick = this.onButton9Click.bind(this);
+			this.btnAdd.onclick = this.onButtonAddClick.bind(this);
+			this.btnSubstract.onclick = this.onButtonSubstractClick.bind(this);
+			this.btnDivide.onclick = this.onButtonDivideClick.bind(this);
+			this.btnMultiply.onclick = this.onButtonMultiplyClick.bind(this);
+			this.btnCalculate.onclick = this.onButtonCalculateClick.bind(this);
+			this.btnDot.onclick = this.onButtonDotClick.bind(this);
+			this.btnClear.onclick = this.onButtonClearClick.bind(this);
+		}
+
+		disconnectedCallback()
+		{
+			//Se va a ejecutar siempre que se quite el elemento del documento
+		}
+
+		adoptedCallback()
+		{
+			//Se va a ejecutar siempre que el elemento se cambie de documento.
+		}
+
+		connectedMoveCallback()
+		{
+			//Se ejecuta cuando se mueve el elemento dentro del DOM
+		}
+
+		static get observableAttributes()
+		{
+			//Solo para publicar cuáles son los atributos que tendría disponible el webcomponent
+			//Si es utilizado a través de código HTML
+			//Ejemplo: <mi-elemento sabor="acido"> </mi-elemento>
+
+			return ['sabor']
+		}
+
+		attributeChangedCallback(attr, newvalue, oldvalue )
+		{
+			//Manejador de cambios de los valores de los atributos personalizados
+		}
+	}
+
+	customElements.define('x-calculator', CustomCalculator );
+
+	
+
+	function main()
+	{
+		document.body.appendChild( new CustomCalculator() );
+	}
+
+	window.onload = main;
+
+	</script>
+</html>
