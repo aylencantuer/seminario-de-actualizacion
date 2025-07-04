@@ -139,27 +139,58 @@
 			//Se va a ejecutar siempre cuando el elemento es insertado en el DOM
 			//DOM = Arbol de elementos HTML ya como instancias (objetos) de JS.
 
-	
-			this.appendChild(this.display);
-			this.appendChild(this.btn0);
-			this.appendChild(this.btn1);
-			this.appendChild(this.btn2);
-			this.appendChild(this.btn3);
-			this.appendChild(this.btn4);
-			this.appendChild(this.btn5);
-			this.appendChild(this.btn6);
-			this.appendChild(this.btn7);
-			this.appendChild(this.btn8);
-			this.appendChild(this.btn9);
-			this.appendChild(this.btnAdd);
-			this.appendChild(this.btnSubstract);
-			this.appendChild(this.btnDivide);
-			this.appendChild(this.btnMultiply);
-			this.appendChild(this.btnCalculate);
-			this.appendChild(this.btnDot);
-			this.appendChild(this.btnClear);
+                // Crea un contenedor para la calculadora y aplica los estilos de cuadrícula
+                const calculatorContainer = document.createElement('div');
+                calculatorContainer.style.display = 'grid';
+                calculatorContainer.style.gridTemplateColumns = 'repeat(4, 50px)'; 
+                calculatorContainer.style.gap = '5px'; // Espacio entre botones
+                calculatorContainer.style.padding = '10px';
+                calculatorContainer.style.border = '1px solid #ccc';
+                calculatorContainer.style.backgroundColor = '#f9f9f9';
+                calculatorContainer.style.width = 'fit-content'; 
+
+                // **Adjuntar elementos al nuevo contenedor en el orden deseado**
+                this.display.style.gridColumn = 'span 4';
+                this.display.style.height = '40px';
+                this.display.style.fontSize = '1.5em';
+                this.display.style.textAlign = 'right';
+                this.display.style.padding = '5px';
+                this.display.style.marginBottom = '10px';
+                calculatorContainer.appendChild(this.display);
+
+                // Definir el orden de los botones
+                const orderedButtons = [
+                    null, null, null, this.btnClear,
+                    this.btn7, this.btn8, this.btn9, this.btnMultiply,
+                    this.btn4, this.btn5, this.btn6, this.btnSubstract,
+                    this.btn1, this.btn2, this.btn3, this.btnAdd,
+                    null, this.btn0, this.btnDot, this.btnDivide
+                ];
+
+                orderedButtons.forEach(btn => {
+                    if (btn) {
+                        calculatorContainer.appendChild(btn);
+                        //Estilo para los botones
+                        btn.style.width = '50px';
+                        btn.style.height = '50px';
+                        btn.style.fontSize = '1.2em';
+                    } else {
+                        //Si hay un 'null' en el array, añadir un div vacío para mantener la cuadrícula
+                        const emptyCell = document.createElement('div');
+                        emptyCell.style.width = '50px';
+                        emptyCell.style.height = '50px';
+                        calculatorContainer.appendChild(emptyCell);
+                    }
+                });
 
 
+            calculatorContainer.appendChild(this.btnCalculate);
+            this.btnCalculate.style.gridColumn = 'span 4'; //Ocupa las 4 columnas
+            this.btnCalculate.style.width = 'auto'; //Permitir que el ancho se ajuste a la columna completa
+
+
+            //Adjuntar el contenedor principal al Web Component
+            this.appendChild(calculatorContainer)
 
 			this.btn0.onclick = this.onButton0Click.bind(this);//bind "enlaza" una función a un objeto específico,
 			this.btn1.onclick = this.onButton1Click.bind(this);
