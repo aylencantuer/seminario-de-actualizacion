@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login Web Component</title>
+</head>
+<body>
+    <login-form></login-form>
+</body>
+<script>
+    class LoginForm extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' }); 
+            
+            this.header = document.createElement('header')
+            this.header.className = 'w3-container w3-teal';
+            this.h1 = document.createElement('h1');
+            this.h1.innerText = 'LoginExample';
+            this.header.appendChild(this.h1);
+            
+            this.mainDiv = document.createElement('div')
+            this.mainDiv.className = 'w3-container w3-half w3-margin-top';
+
+            this.form = document.createElement('form')
+            this.form.className = 'w3-container w3-card-4'; 
+
+            
+            this.pName = document.createElement('p');
+            this.inputName = document.createElement('input');
+            this.inputName.className = 'w3-input';
+            this.inputName.type = 'text';
+            this.inputName.style.width = '90%';
+            this.inputName.required = true;
+            this.labelName = document.createElement('label');
+            this.labelName.innerText = 'Name';
+            this.pName.appendChild(this.inputName);
+            this.pName.appendChild(this.labelName);
+
+            this.pPassword = document.createElement('p');
+            this.inputPassword = document.createElement('input');
+            this.inputPassword.className = 'w3-input';
+            this.inputPassword.type = 'password';
+            this.inputPassword.style.width = '90%';
+            this.inputPassword.required = true;
+            this.labelPassword = document.createElement('label');
+            this.labelPassword.innerText = 'Password';
+            this.pPassword.appendChild(this.inputPassword);
+            this.pPassword.appendChild(this.labelPassword);
+
+
+            this.pRadioFemale = document.createElement('p');
+            this.inputRadioFemale = document.createElement('input');
+            this.inputRadioFemale.className = 'w3-radio';
+            this.inputRadioFemale.type = 'radio';
+            this.inputRadioFemale.name = 'gender';
+            this.inputRadioFemale.value = 'female';
+            this.labelRadioFemale = document.createElement('label');
+            this.labelRadioFemale.innerText = 'Female';
+            this.pRadioFemale.appendChild(this.inputRadioFemale);
+            this.pRadioFemale.appendChild(this.labelRadioFemale);
+
+            this.pRadioMale = document.createElement('p');
+            this.inputRadioMale = document.createElement('input');
+            this.inputRadioMale.className = 'w3-radio';
+            this.inputRadioMale.type = 'radio';
+            this.inputRadioMale.name = 'gender';
+            this.inputRadioMale.value = 'male';
+            this.inputRadioMale.checked = true;
+            this.labelRadioMale = document.createElement('label');
+            this.labelRadioMale.innerText = 'Male';
+            this.pRadioMale.appendChild(this.inputRadioMale);
+            this.pRadioMale.appendChild(this.labelRadioMale);
+
+            this.pRadioDisabled = document.createElement('p');
+            this.inputRadioDisabled = document.createElement('input');
+            this.inputRadioDisabled.className = 'w3-radio'; 
+            this.inputRadioDisabled.type = 'radio';
+            this.inputRadioDisabled.name = 'gender';
+            this.inputRadioDisabled.value = '';
+            this.inputRadioDisabled.disabled = true; // Atributo disabled
+            this.labelRadioDisabled = document.createElement('label');
+            this.labelRadioDisabled.innerText = "Don't know (Disabled)";
+            this.pRadioDisabled.appendChild(this.inputRadioDisabled);
+            this.pRadioDisabled.appendChild(this.labelRadioDisabled);
+
+            this.pRadioOther = document.createElement('p');
+            this.inputRadioOther = document.createElement('input');
+            this.inputRadioOther.className = 'w3-radio';
+            this.inputRadioOther.type = 'radio';
+            this.inputRadioOther.name = 'gender';
+            this.inputRadioOther.value = 'Other';
+            this.inputRadioOther.checked = true;
+            this.labelRadioOther = document.createElement('label');
+            this.labelRadioOther.innerText = 'Other';
+            this.pRadioOther.appendChild(this.inputRadioOther);
+            this.pRadioOther.appendChild(this.labelRadioOther);
+
+            this.pCheckbox = document.createElement('p');
+            this.inputCheckbox = document.createElement('input');
+            this.inputCheckbox.id = 'milk';
+            this.inputCheckbox.className = 'w3-check';
+            this.inputCheckbox.type = 'checkbox';
+            this.inputCheckbox.checked = true;
+            this.labelCheckbox = document.createElement('label');
+            this.labelCheckbox.setAttribute('for', 'milk');
+            this.labelCheckbox.innerText = 'Stay logged in';
+            this.pCheckbox.appendChild(this.inputCheckbox);
+            this.pCheckbox.appendChild(this.labelCheckbox);
+
+            this.pButton = document.createElement('p');
+            this.buttonLogin = document.createElement('button');
+            this.buttonLogin.className = 'w3-button w3-section w3-teal w3-ripple';
+            this.buttonLogin.innerText = 'Log in';
+            this.pButton.appendChild(this.buttonLogin);
+
+        }
+
+        connectedCallback()
+        {
+            //Cargar el CSS de W3Schools
+            const w3cssLink = document.createElement('link');
+            w3cssLink.rel = 'stylesheet';
+            w3cssLink.href = 'https://www.w3schools.com/w3css/5/w3.css';
+            this.shadowRoot.appendChild(w3cssLink);
+
+            //Añadir un estilo para el host (`:host`) para hacerlo visible
+            const hostStyle = document.createElement('style');
+            hostStyle.textContent = `
+                :host {
+                    display: block; /* Esto es crucial para que el componente ocupe espacio */
+                }
+            `;
+            this.shadowRoot.appendChild(hostStyle);
+
+            this.shadowRoot.appendChild(this.header);
+            this.shadowRoot.appendChild(this.mainDiv);
+            this.mainDiv.appendChild(this.form);
+
+            this.form.appendChild(this.pName);
+            this.form.appendChild(this.pPassword);
+            this.form.appendChild(this.pRadioFemale);
+            this.form.appendChild(this.pRadioMale);
+            this.form.appendChild(this.pRadioDisabled);
+            this.form.appendChild(this.pRadioOther); 
+            this.form.appendChild(this.pCheckbox);
+            this.form.appendChild(this.pButton);
+
+            // Agregar evento al botón de Log In
+            this.buttonLogin.onclick = (event) => {
+                event.preventDefault(); // Evitar el envío del formulario
+                alert('Form submitted!');
+            };
+        }
+
+    }
+
+    customElements.define('login-form', LoginForm);
+
+</script>
+</html>
