@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>W3.CSS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+</head>
+<body>
+<br>
+
+<div class="w3-container">
+    <h2>Responsive Pricing Tables</h2>
+</div>
+
+<plan-pricing-tables plans='[
+    {"name": "Basic", "color": "black", "price": "10", "period": "per month", "features": ["<b>10GB</b> Storage", "<b>10</b> Emails", "<b>10</b> Domains", "<b>Endless</b> Support"]},
+    {"name": "Pro", "color": "green", "price": "25", "period": "per month", "features": ["<b>25GB</b> Storage", "<b>25</b> Emails", "<b>25</b> Domains", "<b>Endless</b> Support"]},
+    {"name": "Premium", "color": "black", "price": "50", "period": "per month", "features": ["<b>50GB</b> Storage", "<b>50</b> Emails", "<b>50</b> Domains", "<b>Endless</b> Support"]}
+]'>
+</plan-pricing-tables>
+
+<script>
+    class PlanPriceTable extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' }); 
+
+            this.contentContainer = document.createElement('div'); 
+            this.contentContainer.className = 'w3-row-padding'; 
+        }
+
+        //Para escuchar/monitorear cambios en los atributos 
+        static get observedAttributes() {
+            return ['plans']; 
+        }
+
+        //Se llama cuando un atributo observado cambia
+        attributeChangedCallback(name, oldValue, newValue) {
+            if (name === 'plans' && newValue !== oldValue) {
+                try {
+                    //Intenta parsear el JSON del atributo 'plans'
+                    this._plans = JSON.parse(newValue);
+                    this.render(); //Vuelve a renderizar el componente con los nuevos datos
+                } catch (e) {
+                    console.error("Error al parsear el atributo 'plans':", e);
+                    this._plans = []; //Si hay un error, usa un array vacío
+                    this.render(); //Renderiza el estado vacío o de error
+                }
+            }
+        }
+
+        connectedCallback() {
+            //Cargar el CSS de W3Schools
+            const w3cssLink = document.createElement('link');
+            w3cssLink.rel = 'stylesheet';
+            w3cssLink.href = 'https://www.w3schools.com/w3css/5/w3.css';
+            this.shadowRoot.appendChild(w3cssLink);
+
+            //Crea un bloque de estilos y define un estilo CSS específico
+            const hostStyle = document.createElement('style');
+            hostStyle.textContent = `:host { display: block; }`;
+            this.shadowRoot.appendChild(hostStyle);
+
+            //Adjuntar el contenedor principal al Shadow DOM
+            this.shadowRoot.appendChild(this.contentContainer);
+
+            // Renderizado inicial si el atributo 'plans' ya está presente en el HTML
+            if (this.hasAttribute('plans')) {
+                this.attributeChangedCallback('plans', null, this.getAttribute('plans'));
+            } else {
+                //si no hay plans(o si hubo un error al parsear el JSON y se reseteó a un array vacío),avisa,mensaje,el componente renderizará un mensaje indicando que no hay planes disponibles. 
+                this.render(); 
+            }
+        }
+
+        //Método para actualizar el contenido del componente
+        render() {
+            // Limpia el contenido dinámico previo del contenedor
+            this.contentContainer.innerHTML = ''; 
+
+            if (this._plans.length === 0) {
+                const noPlansMessage = document.createElement('p');
+                noPlansMessage.textContent = 'No hay planes de precios disponibles en este momento.';
+                noPlansMessage.className = 'w3-center w3-text-grey w3-padding-13';
+                this.contentContainer.appendChild(noPlansMessage);
+                return;
+            }
+
+            // Itera sobre los datos de los planes y crea una tarjeta para cada uno
+            this._plans.forEach(plan => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'w3-third w3-margin-bottom';
+
+                const ul = document.createElement('ul');
+                ul.className = 'w3-ul w3-border w3-center w3-hover-shadow';
+
+                // Nombre del plan
+                //Li=list item
+                const nameLi = document.createElement('li');
+                nameLi.className = `w3-${plan.color} w3-xlarge w3-padding-32`;
+                nameLi.textContent = plan.name;
+                ul.appendChild(nameLi);
+
+                
+                plan.features.forEach(feature => {
+                    const featureLi = document.createElement('li');
+                    featureLi.className = 'w3-padding-16';
+                    featureLi.innerHTML = feature;
+                    ul.appendChild(featureLi);
+                });
+
+                //Precio del plan
+                const priceLi = document.createElement('li');
+                priceLi.className = 'w3-padding-10';
+                const h2Price = document.createElement('h2');
+                h2Price.className = 'w3-wide';
+                h2Price.textContent = `$${plan.price}`;
+                const spanPeriod = document.createElement('span');
+                spanPeriod.className = 'w3-opacity';
+                spanPeriod.textContent = plan.period;
+                priceLi.appendChild(h2Price);
+                priceLi.appendChild(spanPeriod);
+                ul.appendChild(priceLi);
+
+                //Botón de registro
+                const buttonLi = document.createElement('li');
+                buttonLi.className = 'w3-light-grey w3-padding-24';
+                const button = document.createElement('button');
+                button.className = 'w3-button w3-green w3-padding-large';
+                button.textContent = 'Sign Up';
+                // Añadir un listener de evento para el botón
+                button.onclick = () => alert(`¡Registrándote para el plan ${plan.name}!`);
+                buttonLi.appendChild(button);
+                ul.appendChild(buttonLi);
+
+                cardDiv.appendChild(ul);
+                this.contentContainer.appendChild(cardDiv);
+            });
+        }
+    }
+    customElements.define('plan-pricing-tables', PlanPriceTable);
+</script>
+
+</body>
+</html>
