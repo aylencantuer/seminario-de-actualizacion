@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividad 4 - Web Component Modal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Demostración de Diálogo Modal con Web Component</h1>
+
+    <!-- Este botón FUERA del componente para lanzar el modal. -->
+    <button id="openModalBtn">Abrir Diálogo Modal</button>
+
+    <!--instanciamos Web Component. -->
+    <wc-modal-dialog id="myModal">
+        <!-- Este es el contenido que se insertará en el <slot> del componente, parte "reusable" -->
+        <div slot="content">
+            <h2>Contenido Personalizado</h2>
+            <p>Este texto está definido en <strong>index.html</strong> pero se muestra dentro del Web Component.</p>
+        </div>
+    </wc-modal-dialog>
+
+    <script type="module" src="main.js"></script>
+
+</body>
+</html>
