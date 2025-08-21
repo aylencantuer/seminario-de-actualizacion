@@ -1,0 +1,39 @@
+<!--Donde ocurre la composición. Ponemos el componente del formulario dentro del componente del modal -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Actividad 5 - Modal con Formulario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Presione el boton para completar sus datos y poder hablar con nosotoros!</h1>
+
+    <!-- Botón que lanza el modal-->
+    <button id="openModalBtn">Contáctenos</button>
+
+    <!-- Composición de componentes:
+         El componente del formulario se anida dentro del slot del componente modal. -->
+    <wc-modal-dialog id="contactModal">
+        <wc-contact-form slot="content"></wc-contact-form>
+    </wc-modal-dialog>
+
+    <!-- Importamos el script principal que contiene la lógica -->
+    <script type="module" src="main.js"></script>
+
+</body>
+</html>
