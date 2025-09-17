@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>XMLHttpRequest Example 1.0</title>
+</head>
+<body>
+
+</body>
+</html>
+
+<script>
+
+class FetchAPIExample extends HTMLElement
+  {
+    constructor()
+    {
+      super();
+      
+      this.requestBtn = document.createElement('button');
+      this.clearBtn = document.createElement('button');
+      this.outputTextArea = document.createElement('textarea');
+
+      this.requestBtn.innerText = 'Efectuar petición';
+      this.clearBtn.innerText = 'Limpiar';
+      
+      this.appendChild(this.requestBtn);
+      this.appendChild(this.clearBtn);
+      this.appendChild(this.outputTextArea);
+    }
+    
+    onClearButtonClick(event)
+    {
+		this.outputTextArea.value = '';
+	}
+    
+    onRequestButtonClick(event)
+    {
+      fetch('https://jsonplaceholder.typicode.com/posts/1').then(response => response.json() ).then(data => this.outputTextArea.value = JSON.stringify(data) );
+    }
+    
+    connectedCallback()
+    {
+      this.requestBtn.onclick = this.onRequestButtonClick.bind(this);
+      this.clearBtn.onclick = this.onClearButtonClick.bind(this);
+    }
+    
+    disconnectedCallback()
+    {
+      this.requestBtn.onclick = null;
+    }
+
+  }
+
+customElements.define('x-request', FetchAPIExample );
+
+function main()
+{
+  let test = new FetchAPIExample();
+  document.body.appendChild(test);
+}
+
+window.onload = main;
+
+</script>
