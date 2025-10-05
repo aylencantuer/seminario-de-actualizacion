@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>MVC Architecture (Version 1.0)</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+/*
+Arquitectura conceptual de separación de responsabilidades
+
+UI (interfaz de usuario) : Contrato de interacción entre el usuario y el sistema
+UI->GUI <-- Contrato de interacción de tipo gráfico entre el usuario y el sistema
+
+Vista (GUI) : La interacción produce eventos
+Controlador: Responder los eventos de interacción que produce la vista
+Modelo: Es el espacio en donde reside la información del sistema y los procesos lógicos asociados a ella.
+
+Modelo (independiente) -> Ciclo de vida del modelo es: Independiente
+Vista (depende de la interfaz del modelo) -> Ciclo de vida de la vista: Independiente
+Controlador (depende de la interfaz del modelo y de la vista) -> Ciclo de vida que puede ser independiente o depender de la vista/modelo.
+
+
+
+Nuestra aproximación es representar cada capa en una clase.
+*/
+
+class View extends HTMLElement
+{
+	constructor( modelInstance )
+	{
+		super();
+
+		this.innerController = new Controller(this, modelInstance ); //composición - ciclo de vida del controlador == ciclo de vida de la vista.
+
+		//Build de la vista
+		this.buttonTest = document.createElement('button');
+		this.buttonTest.innerText = 'TestClickHere!';
+
+		this.appendChild(this.buttonTest);
+	}
+
+	connectedCallback()
+	{
+		//Primero, hago el enlace entre el evento producido por la vista y su manejador del controlador.
+		this.buttonTest.onclick = this.innerController.onButtonTestClick.bind(this.innerController);
+
+
+		//Una vez que hago todos los enlaces de eventos producidos con sus manejadores.. recién enciendo el controlador.
+		this.innerController.init();
+	}
+
+	disconnectedCallback()
+	{
+		//Desactivar los enlaces al controlador
+		this.buttonTest.onclick = null;
+
+		this.innerController.release();
+	}
+
+	//métodos de actualización
+	update( data )
+	{
+		alert(data);
+	}
+}
+
+customElements.define('x-view-mvc', View);
+
+class Controller
+{
+	constructor( _viewInstance, _modelInstance )
+	{
+		this.viewInstance = _viewInstance;
+		this.modelInstance = _modelInstance;
+	}
+
+	init() //on / enable
+	{
+		console.log('Initializing controller...');
+	}
+
+	release() //off  / disable
+	{
+		console.log('Releasing controller...');
+	}
+
+	run()  //solo por cuestiones de asincronía
+	{
+
+	}
+
+	stop()
+	{
+
+	}
+
+	onButtonTestClick(event)
+	{
+		let response = this.modelInstance.getData();
+		this.viewInstance.update(response);
+	}
+}
+
+class Model
+{
+	constructor()
+	{
+		this.myDataExample = [0,1,2,3,4,5];
+	}
+
+	getData()
+	{
+		return this.myDataExample;
+	}
+}
+
+function main()
+{
+	let model = new Model();
+	let view = new View(model);
+
+	//Recien se muestra en pantalla, cuando se añade el webcomponent en el arbol del DOM
+	document.body.appendChild(view);
+
+}
+
+function main_sin_mvc()
+{
+	let model = [0,1,2,3,4,5];
+	let btn = document.createElement('button');
+	btn.innerText = 'TestClickHere!';
+	btn.onclick = () => { alert( model ) } ;
+
+	document.body.appendChild(btn);
+}
+
+//window.onload = main;
+window.onload = main_sin_mvc;
+
+</script>
+
+</html>
+  */
